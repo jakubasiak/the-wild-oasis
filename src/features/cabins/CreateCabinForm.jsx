@@ -10,7 +10,7 @@ import { useEditCabin } from './useEditCabin';
 
 
 
-function CreateCabinForm({ cabinToEdit = {} }) {
+function CreateCabinForm({ cabinToEdit = {}, onCloseModal }) {
   const { id: editId, ...editValues } = cabinToEdit;
   const isEditSession = Boolean(editId);
   const { register, handleSubmit, getValues, formState, reset } = useForm({
@@ -27,11 +27,17 @@ function CreateCabinForm({ cabinToEdit = {} }) {
     const image = typeof data.image === 'string' ? data.image : data.image[0];
     if (isEditSession) {
       editCabin({ newCabinData: { ...data, image: image }, id: editId }, {
-        onSuccess: (data) => reset(),
+        onSuccess: (data) => {
+          reset();
+          onCloseModal?.();
+        }
       });
     } else {
       createCabin({ ...data, image: image }, {
-        onSuccess: (data) => reset(),
+        onSuccess: (data) => {
+          reset();
+          onCloseModal?.();
+        },
       });
     }
   }
@@ -41,7 +47,7 @@ function CreateCabinForm({ cabinToEdit = {} }) {
   }
 
   return (
-    <Form onSubmit={handleSubmit(onSubmit, onError)}>
+    <Form onSubmit={handleSubmit(onSubmit, onError)} type={onCloseModal ? 'modal' : 'regular'}>
       <FormRow label="Cabin name" error={errors?.name?.message}>
         <Input type="text" id="name" disabled={isWorking} {...register('name', {
           required: "This field is required"
@@ -89,10 +95,10 @@ function CreateCabinForm({ cabinToEdit = {} }) {
 
       <FormRow>
         {/* type is an HTML attribute! */}
-        <Button variation="secondary" type="reset" disabled={isWorking}>
+        <Button disabled={isCreating}>{isEditSession ? 'Edit cabin' : 'Create new cabin'}</Button>
+        <Button variation="secondary" type="reset" disabled={isWorking} onClick={() => onCloseModal?.()}>
           Cancel
         </Button>
-        <Button disabled={isCreating}>{isEditSession ? 'Edit cabin' : 'Create new cabin'}</Button>
       </FormRow>
     </Form>
   );
