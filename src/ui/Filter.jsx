@@ -41,6 +41,7 @@ function Filter({ filterField, options }) {
 
   function handleClick(value) {
     searchParams.set(filterField, value);
+    searchParams.delete('page');
     setSearchParams(searchParams);
   }
 
